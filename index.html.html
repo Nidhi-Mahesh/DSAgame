@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DSA Library Quest VR</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+  <style>
+    #coins-hud {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: gold;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    #coins-icon {
+      width: 24px;
+      height: 24px;
+      background-color: gold;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <!-- 2D Coins HUD (stays at top of screen) -->
+  <div id="coins-hud">
+    <div id="coins-icon"></div>
+    <span id="coins-count">Coins: 0</span>
+  </div>
+
+  <a-scene cursor="rayOrigin: mouse; fuse: false">
+
+    <!-- Lights -->
+    <a-entity light="type: ambient; intensity: 1; color: #ddd"></a-entity>
+    <a-entity light="type: point; intensity: 1.5; color: #b19cd9" position="0 5 0"></a-entity> <!-- Soft purple glow -->
+    <a-entity light="type: point; intensity: 1.5; color: #7eb6ff" position="0 5 -30"></a-entity> <!-- Blue glow in second room -->
+    <a-entity light="type: point; intensity: 1.5; color: #ff7e7e" position="0 5 -60"></a-entity> <!-- Red glow in third room -->
+
+    <!-- Sky -->
+    <a-sky color="#4b0082"></a-sky>
+
+    <!-- Ground -->
+    <a-plane color="#e0d0ff" rotation="-90 0 0" width="200" height="200"></a-plane>
+
+    <!-- First Room Walls -->
+    <a-box position="-5 2 -10" width="0.5" height="5" depth="20" color="#7b68ee"></a-box>
+    <a-box position="5 2 -10" width="0.5" height="5" depth="20" color="#7b68ee"></a-box>
+    <a-box position="0 4 -20" width="10" height="5" depth="0.5" color="#7b68ee"></a-box>
+
+    <!-- THE FIRST DOOR -->
+    <a-box id="door1" position="0 2 -15" width="3" height="5" depth="0.5" color="#6a0dad"></a-box>
+
+    <!-- First Room Scroll -->
+    <a-cylinder id="scroll1" position="0 1.5 -4" color="#FFD700" height="0.7" radius="0.3"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 4000"
+      material="emissive: #FFD700; emissiveIntensity: 1"
+      class="clickable">
+    </a-cylinder>
+
+    <!-- First Question Panel (Hidden initially) -->
+    <a-entity id="question-panel1" visible="false">
+      <a-plane position="0 2 -4" width="5" height="3" color="#ffffff" opacity="0.95">
+        <a-text id="question-text1" value="Loading..." color="#000" align="center" width="4" position="0 1 0.1"></a-text>
+
+        <!-- Answer Buttons -->
+        <a-plane id="option1-1" position="-1.5 -0.5 0.1" width="1.8" height="0.6" color="#FF6666" class="clickable">
+          <a-text value="a) O(1)" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <a-plane id="option1-2" position="0 -0.5 0.1" width="1.8" height="0.6" color="#66FF66" class="clickable">
+          <a-text value="b) O(n)" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <a-plane id="option1-3" position="1.5 -0.5 0.1" width="1.8" height="0.6" color="#6666FF" class="clickable">
+          <a-text value="c) O(log n)" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+      </a-plane>
+    </a-entity>
+
+    <!-- Second Room Walls -->
+    <a-box position="-5 2 -30" width="0.5" height="5" depth="20" color="#b19cd9"></a-box>
+    <a-box position="5 2 -30" width="0.5" height="5" depth="20" color="#b19cd9"></a-box>
+    <a-box position="0 4 -40" width="10" height="5" depth="0.5" color="#b19cd9"></a-box>
+
+    <!-- THE SECOND DOOR -->
+    <a-box id="door2" position="0 2 -35" width="3" height="5" depth="0.5" color="#4a0d6a"></a-box>
+
+    <!-- Second Room Scrolls -->
+    <a-cylinder id="scroll2-1" position="-2 1.5 -25" color="#7eb6ff" height="0.7" radius="0.3"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 4000"
+      material="emissive: #7eb6ff; emissiveIntensity: 1"
+      class="clickable">
+    </a-cylinder>
+
+    <a-cylinder id="scroll2-2" position="2 1.5 -25" color="#ff7eb6" height="0.7" radius="0.3"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 4000"
+      material="emissive: #ff7eb6; emissiveIntensity: 1"
+      class="clickable">
+    </a-cylinder>
+
+    <!-- Second Room Question Panels (Hidden initially) -->
+    <a-entity id="question-panel2-1" visible="false">
+      <a-plane position="-2 2 -25" width="5" height="3" color="#ffffff" opacity="0.95">
+        <a-text id="question-text2-1" value="Loading..." color="#000" align="center" width="4" position="0 1 0.1"></a-text>
+
+        <!-- Answer Buttons -->
+        <a-plane id="option2-1-1" position="-1.5 -0.5 0.1" width="1.8" height="0.6" color="#FF6666" class="clickable">
+          <a-text value="a) Array" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <a-plane id="option2-1-2" position="0 -0.5 0.1" width="1.8" height="0.6" color="#66FF66" class="clickable">
+          <a-text value="b) Linked List" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <a-plane id="option2-1-3" position="1.5 -0.5 0.1" width="1.8" height="0.6" color="#6666FF" class="clickable">
+          <a-text value="c) Tree" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+      </a-plane>
+    </a-entity>
+
+    <a-entity id="question-panel2-2" visible="false">
+      <a-plane position="2 2 -25" width="5" height="3" color="#ffffff" opacity="0.95">
+        <a-text id="question-text2-2" value="Loading..." color="#000" align="center" width="4" position="0 1 0.1"></a-text>
+
+        <!-- Answer Buttons -->
+        <a-plane id="option2-2-1" position="-1.5 -0.5 0.1" width="1.8" height="0.6" color="#FF6666" class="clickable">
+          <a-text value="a) O(1)" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <a-plane id="option2-2-2" position="0 -0.5 0.1" width="1.8" height="0.6" color="#66FF66" class="clickable">
+          <a-text value="b) O(n)" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+
+        <a-plane id="option2-2-3" position="1.5 -0.5 0.1" width="1.8" height="0.6" color="#6666FF" class="clickable">
+          <a-text value="c) O(n^2)" align="center" color="#000" width="2" position="0 0 0.1"></a-text>
+        </a-plane>
+      </a-plane>
+    </a-entity>
+
+    <!-- Second Room floating magical elements -->
+    <a-torus-knot position="0 2 -30" radius="1" radius-tubular="0.2" color="#ff69b4"
+      animation="property: rotation; to: 0 360 360; loop: true; dur: 5000">
+    </a-torus-knot>
+
+    <!-- Third Room Walls -->
+    <a-box position="-5 2 -50" width="0.5" height="5" depth="20" color="#8a0d6a"></a-box>
+    <a-box position="5 2 -50" width="0.5" height="5" depth="20" color="#8a0d6a"></a-box>
+    <a-box position="0 4 -60" width="10" height="5" depth="0.5" color="#8a0d6a"></a-box>
+
+    <!-- Third Room - Final treasure chest -->
+    <a-box id="treasure" position="0 0.5 -55" width="2" height="1" depth="1.5" color="#a87400"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; enabled: false">
+    </a-box>
+    <a-box id="treasure-lid" position="0 1.25 -55" width="2.2" height="0.5" depth="1.7" color="#8a5e00"
+      animation="property: rotation; axis: 1 0 0; from: 0 0 0; to: -90 0 0; dur: 2000; enabled: false">
+    </a-box>
+
+    <!-- Final victory text (hidden initially) -->
+    <a-entity id="victory-text" visible="false">
+      <a-text value="CONGRATULATIONS!" color="#FFD700" width="10" align="center" position="0 4 -55"></a-text>
+      <a-text value="You have solved all the riddles!" color="#FFF" width="6" align="center" position="0 3 -55"></a-text>
+      <a-text id="final-coins-text" value="Total Coins: 0" color="#FFD700" width="6" align="center" position="0 2 -55"></a-text>
+    </a-entity>
+
+    <!-- Coin Animation Template (for collecting coins) -->
+    <a-entity id="coin-template" visible="false">
+      <a-circle radius="0.3" color="#FFD700" material="side: double; emissive: #FFD700; emissiveIntensity: 0.8"></a-circle>
+    </a-entity>
+
+    <!-- Camera and Cursor -->
+    <a-entity id="cameraRig" position="0 1.6 0">
+      <a-camera>
+        <a-cursor 
+          color="yellow" 
+          rayOrigin="mouse"
+          fuse="false"
+          animation__mouseenter="property: scale; startEvents: mouseenter; to: 1.2 1.2 1.2; dur: 200"
+          animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1; dur: 200">
+        </a-cursor>
+      </a-camera>
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    // Select elements
+    const scroll1 = document.querySelector("#scroll1");
+    const panel1 = document.querySelector("#question-panel1");
+    const door1 = document.querySelector("#door1");
+    
+    const scroll2_1 = document.querySelector("#scroll2-1");
+    const scroll2_2 = document.querySelector("#scroll2-2");
+    const panel2_1 = document.querySelector("#question-panel2-1");
+    const panel2_2 = document.querySelector("#question-panel2-2");
+    const door2 = document.querySelector("#door2");
+    
+    const treasure = document.querySelector("#treasure");
+    const treasureLid = document.querySelector("#treasure-lid");
+    const victoryText = document.querySelector("#victory-text");
+    const finalCoinsText = document.querySelector("#final-coins-text");
+    
+    // 2D HUD Elements
+    const coinsCount = document.querySelector("#coins-count");
+    const coinsHud = document.querySelector("#coins-hud");
+
+    // Coins counter
+    let coins = 0;
+    const COINS_PER_PUZZLE = 10;
+    const FINAL_TREASURE_COINS = 20;
+
+    // Track puzzle completion status
+    let puzzleStatus = {
+      puzzle1: false,
+      puzzle2_1: false,
+      puzzle2_2: false
+    };
+    
+    // Update the coins display function - properly implemented now
+    function updateCoinsDisplay() {
+      // Update the 2D HUD
+      coinsCount.textContent = `Coins: ${coins}`;
+      
+      // Update the victory screen coin count
+      finalCoinsText.setAttribute("value", `Total Coins: ${coins}`);
+      
+      // Add animation to the HUD when coins change
+      coinsHud.style.transform = "translateX(-50%) scale(1.2)";
+      setTimeout(() => {
+        coinsHud.style.transform = "translateX(-50%) scale(1)";
+      }, 300);
+    }
+    
+    // Award coins function with animation
+    function awardCoins(amount, position) {
+      // Create a coin visual that floats up and fades
+      const coin = document.createElement('a-entity');
+      coin.setAttribute('geometry', 'primitive: circle; radius: 0.3;');
+      coin.setAttribute('material', 'color: #FFD700; emissive: #FFD700; emissiveIntensity: 0.8; side: double;');
+      coin.setAttribute('position', position);
+      coin.setAttribute('text', `value: +${amount}; color: #FFFFFF; align: center; width: 5;`);
+      document.querySelector('a-scene').appendChild(coin);
+      
+      // Animate the coin
+      coin.setAttribute('animation__position', 'property: position.y; to: ' + (position.y + 2) + '; dur: 1500; easing: easeOutQuad;');
+      coin.setAttribute('animation__opacity', 'property: material.opacity; to: 0; dur: 1500; easing: easeOutQuad;');
+      
+      // Add coins to counter
+      coins += amount;
+      updateCoinsDisplay();
+      
+      // Remove the coin entity after animation
+      setTimeout(() => {
+        coin.parentNode.removeChild(coin);
+      }, 1500);
+    }
+    
+    // First room scroll
+    scroll1.addEventListener("click", () => {
+      scroll1.setAttribute("visible", "false");
+      panel1.setAttribute("visible", "true");
+      document.querySelector("#question-text1").setAttribute("value",
+        "What is the time complexity of a linear search algorithm in the worst-case scenario?");
+    });
+
+    document.querySelector("#option1-1").addEventListener("click", () => wrongAnswer("First puzzle"));
+    document.querySelector("#option1-2").addEventListener("click", () => {
+      correctAnswer("First puzzle");
+      puzzleStatus.puzzle1 = true;
+      // Award coins
+      awardCoins(COINS_PER_PUZZLE, {x: 0, y: 2, z: -4});
+      // Animate door UP to open
+      door1.setAttribute("animation", "property: position; to: 0 8 -15; dur: 2000; easing: easeInOutQuad");
+      panel1.setAttribute("visible", "false");
+      
+      // Show confetti
+      launchConfetti();
+    });
+    document.querySelector("#option1-3").addEventListener("click", () => wrongAnswer("First puzzle"));
+
+    // Second room scrolls
+    scroll2_1.addEventListener("click", () => {
+      scroll2_1.setAttribute("visible", "false");
+      panel2_1.setAttribute("visible", "true");
+      document.querySelector("#question-text2-1").setAttribute("value",
+        "Which data structure is a non-linear data structure?");
+    });
+
+    document.querySelector("#option2-1-1").addEventListener("click", () => wrongAnswer("Blue scroll puzzle"));
+    document.querySelector("#option2-1-2").addEventListener("click", () => wrongAnswer("Blue scroll puzzle"));
+    document.querySelector("#option2-1-3").addEventListener("click", () => {
+      correctAnswer("Blue scroll puzzle");
+      panel2_1.setAttribute("visible", "false");
+      puzzleStatus.puzzle2_1 = true;
+      // Award coins
+      awardCoins(COINS_PER_PUZZLE, {x: -2, y: 2, z: -25});
+      checkSecondRoomCompletion();
+      
+      // Show confetti
+      launchConfetti();
+    });
+
+    scroll2_2.addEventListener("click", () => {
+      scroll2_2.setAttribute("visible", "false");
+      panel2_2.setAttribute("visible", "true");
+      document.querySelector("#question-text2-2").setAttribute("value",
+        "What is the time complexity of inserting an element at the beginning of a singly linked list?");
+    });
+
+    document.querySelector("#option2-2-1").addEventListener("click", () => {
+      correctAnswer("Pink scroll puzzle");
+      panel2_2.setAttribute("visible", "false");
+      puzzleStatus.puzzle2_2 = true;
+      // Award coins
+      awardCoins(COINS_PER_PUZZLE, {x: 2, y: 2, z: -25});
+      checkSecondRoomCompletion();
+      
+      // Show confetti
+      launchConfetti();
+    });
+    document.querySelector("#option2-2-2").addEventListener("click", () => wrongAnswer("Pink scroll puzzle"));
+    document.querySelector("#option2-2-3").addEventListener("click", () => wrongAnswer("Pink scroll puzzle"));
+
+    function checkSecondRoomCompletion() {
+      if (puzzleStatus.puzzle2_1 && puzzleStatus.puzzle2_2) {
+        // Both puzzles solved, open the second door
+        door2.setAttribute("animation", "property: position; to: 0 8 -35; dur: 2000; easing: easeInOutQuad");
+        
+        // Extra confetti for completing the room
+        setTimeout(() => {
+          launchConfetti({spread: 180, particleCount: 200});
+        }, 500);
+      }
+    }
+
+    function correctAnswer(puzzleName) {
+      alert(`Correct! You solved the ${puzzleName}!`);
+    }
+
+    function wrongAnswer(puzzleName) {
+      alert(`Wrong! Try again with the ${puzzleName}!`);
+    }
+    
+    // Treasure chest interaction
+    treasure.addEventListener("click", () => {
+      treasure.setAttribute("animation", "enabled", "true");
+      treasureLid.setAttribute("animation", "enabled", "true");
+      victoryText.setAttribute("visible", "true");
+      
+      // Award extra coins for opening the treasure
+      awardCoins(FINAL_TREASURE_COINS, {x: 0, y: 2, z: -55});
+      
+      // Grand finale confetti
+      setTimeout(() => {
+        launchConfetti({
+          spread: 360,
+          particleCount: 300,
+          origin: { y: 0.5 }
+        });
+      }, 500);
+      
+      setTimeout(() => {
+        launchConfetti({
+          spread: 360,
+          particleCount: 200,
+          origin: { y: 0.5 },
+          colors: ['#FFD700', '#FFA500', '#FF4500']
+        });
+      }, 1500);
+    });
+
+    // Confetti function
+    function launchConfetti(options = {}) {
+      const defaults = {
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      };
+      
+      confetti({
+        ...defaults,
+        ...options
+      });
+    }
+    
+    // Initialize the coins display
+    updateCoinsDisplay();
+  </script>
+</body>
+</html>
